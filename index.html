@@ -9,42 +9,49 @@
     <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="bg-gray-100 dark:bg-gray-900">
+<body class="bg-27445D text-white">
 
 <div class="flex">
     <!-- Sidebar -->
-    <div class="bg-blue-800 text-white w-64 min-h-screen p-5">
+    <div class="bg-FFA725 text-white w-64 min-h-screen p-5">
         <h2 class="text-2xl font-bold">Admin Dashboard</h2>
         <ul class="mt-5 space-y-2">
-            <li class="p-2 hover:bg-blue-600 cursor-pointer">Dashboard</li>
-            <li class="p-2 hover:bg-blue-600 cursor-pointer">Manajemen Pengguna</li>
+            <li class="p-2 hover:bg-71BBB2 cursor-pointer">Dashboard</li>
+            <li class="p-2 hover:bg-71BBB2 cursor-pointer">Manajemen Pengguna</li>
         </ul>
     </div>
 
     <!-- Content -->
     <div class="flex-1 p-5">
-        <button id="toggleDarkMode" class="bg-gray-600 text-white px-4 py-2 rounded-md">🌙 Mode Dark</button>
+        <div class="flex justify-between">
+            <button id="toggleDarkMode" class="bg-71BBB2 text-white px-4 py-2 rounded-md">🌙 Mode Dark</button>
+            <select id="viewToggle" class="bg-[#71BBB2] text-white px-4 py-2 rounded-md">
+                <option value="table">Tampilkan Tabel</option>
+                <option value="chart">Tampilkan Grafik</option>
+            </select>
+            <button id="logout" class="bg-71BBB2 text-white px-4 py-2 rounded-md">Logout</button>            
+        </div>
 
         <h1 class="text-3xl font-bold mt-5">Dashboard</h1>
 
-        <!-- Statistik -->
-        <div class="mt-5">
+        <!-- Grafik Statistik -->
+        <div class="mt-5 hidden" id="chartContainer">
             <h2 class="text-xl font-semibold">Statistik Pengguna</h2>
             <canvas id="userChart"></canvas>
         </div>
 
         <!-- Manajemen Pengguna -->
-        <div class="mt-5">
+        <div class="mt-5" id="tableContainer">
             <h2 class="text-xl font-semibold">Manajemen Pengguna</h2>
 
             <div class="flex space-x-2 mt-3">
                 <input type="text" id="searchUser" placeholder="Cari pengguna..." class="p-2 border rounded w-1/2">
-                <button id="addUser" class="bg-green-500 text-white px-4 py-2 rounded">Tambah</button>
+                <button id="addUser" class="bg-71BBB2 text-white px-4 py-2 rounded">Tambah</button>
             </div>
 
-            <table class="w-full bg-white shadow-md rounded mt-3">
+            <table class="w-full bg-white shadow-md rounded mt-3 text-black">
                 <thead>
-                    <tr class="bg-blue-600 text-white">
+                    <tr class="bg-FFA725 text-white">
                         <th class="p-3">ID</th>
                         <th class="p-3">Nama</th>
                         <th class="p-3">Email</th>

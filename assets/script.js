@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const darkModeButton = document.getElementById("toggleDarkMode");
     const body = document.body;
-
     let isDarkMode = localStorage.getItem("darkMode") === "true";
     setDarkMode(isDarkMode);
 
@@ -42,7 +41,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 <td class="p-3">${user.nama}</td>
                 <td class="p-3">${user.email}</td>
                 <td class="p-3">
-                    <button onclick="editUser(${user.id})" class="bg-yellow-500 text-white px-2 py-1 rounded">Edit</button>
                     <button onclick="deleteUser(${user.id})" class="bg-red-500 text-white px-2 py-1 rounded">Hapus</button>
                 </td>
             </tr>`;
@@ -52,44 +50,35 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("pageInfo").textContent = `Halaman ${currentPage}`;
     }
 
-    window.editUser = function (id) {
-        let user = users.find(u => u.id === id);
-        let newName = prompt("Edit Nama:", user.nama);
-        if (newName) {
-            user.nama = newName;
-            renderUsers();
-        }
-    };
-
     window.deleteUser = function (id) {
         users = users.filter(u => u.id !== id);
         renderUsers();
     };
 
-    document.getElementById("addUser").addEventListener("click", function () {
-        let newName = prompt("Nama pengguna baru:");
-        let newEmail = prompt("Email pengguna:");
-        if (newName && newEmail) {
-            users.push({ id: users.length + 1, nama: newName, email: newEmail });
-            renderUsers();
+    renderUsers();
+
+    // Grafik Statistik
+    const ctx = document.getElementById("userChart").getContext("2d");
+    new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: users.map(u => u.nama),
+            datasets: [{
+                label: "Jumlah Pengguna",
+                data: users.map(() => Math.floor(Math.random() * 10) + 1),
+                backgroundColor: "#FFA725"
+            }]
         }
     });
 
-    document.getElementById("searchUser").addEventListener("keyup", function (e) {
-        let keyword = e.target.value.toLowerCase();
-        users = users.filter(user => user.nama.toLowerCase().includes(keyword));
-        renderUsers();
+    // Pilihan Tampilan
+    document.getElementById("viewToggle").addEventListener("change", function () {
+        if (this.value === "chart") {
+            document.getElementById("chartContainer").classList.remove("hidden");
+            document.getElementById("tableContainer").classList.add("hidden");
+        } else {
+            document.getElementById("chartContainer").classList.add("hidden");
+            document.getElementById("tableContainer").classList.remove("hidden");
+        }
     });
-
-    document.getElementById("prevPage").addEventListener("click", function () {
-        if (currentPage > 1) currentPage--;
-        renderUsers();
-    });
-
-    document.getElementById("nextPage").addEventListener("click", function () {
-        if (currentPage < Math.ceil(users.length / itemsPerPage)) currentPage++;
-        renderUsers();
-    });
-
-    renderUsers();
 });

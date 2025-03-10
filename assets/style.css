@@ -1,4 +1,8 @@
-/* Mode Gelap */
+body {
+    background-color: #27445D;
+    color: white;
+}
+
 .dark {
     background-color: #1a202c;
     color: white;
@@ -9,10 +13,18 @@
     color: white;
 }
 
-.dark .bg-blue-600 {
+.dark .bg-FFA725 {
     background-color: #4a5568;
 }
 
-.dark button {
-    background-color: #4a5568;
+button {
+    background-color: #71BBB2;
+    background-color: #c48601;
+}
+#viewToggle:hover {
+    background-color: #c48601; 
+}
+
+button:hover {
+    background-color: #FFA725;
 }
