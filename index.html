@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-blue-900 text-white p-4">
+            <h2 class="text-xl font-bold">Dashboard</h2>
+            <ul class="mt-4">
+                <li class="p-2 hover:bg-blue-700 cursor-pointer">🏠 Beranda</li>
+                <li class="p-2 hover:bg-blue-700 cursor-pointer">📊 Statistik</li>
+                <li class="p-2 hover:bg-blue-700 cursor-pointer">📝 Tugas</li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-6">
+            <h1 class="text-3xl font-bold">Selamat Datang!</h1>
+            <canvas id="myChart" class="mt-4"></canvas>
+
+            <!-- Tabel Data -->
+            <div class="mt-6">
+                <h2 class="text-xl font-bold">Daftar Tugas</h2>
+                <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden mt-2">
+                    <thead>
+                        <tr class="bg-blue-600 text-white">
+                            <th class="p-3 text-left">ID</th>
+                            <th class="p-3 text-left">Judul</th>
+                            <th class="p-3 text-left">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch data from API
+        fetch('https://jsonplaceholder.typicode.com/todos')
+            .then(response => response.json())
+            .then(data => {
+                let rows = '';
+                data.slice(0, 5).forEach(task => {
+                    rows += `<tr class='border-b'>
+                        <td class='p-3'>${task.id}</td>
+                        <td class='p-3'>${task.title}</td>
+                        <td class='p-3'>${task.completed ? '✅ Selesai' : '⏳ Belum Selesai'}</td>
+                    </tr>`;
+                });
+                document.getElementById('taskTable').innerHTML = rows;
+            });
+
+        // Chart.js Statistik
+        const ctx = document.getElementById('myChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'],
+                datasets: [{
+                    label: 'Tugas Selesai',
+                    data: [12, 19, 3, 5, 2],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            }
+        });
+    </script>
+</body>
+</html>
