@@ -3,73 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
+    <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="bg-gray-100">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <div class="w-64 bg-blue-900 text-white p-4">
-            <h2 class="text-xl font-bold">Dashboard</h2>
-            <ul class="mt-4">
-                <li class="p-2 hover:bg-blue-700 cursor-pointer">🏠 Beranda</li>
-                <li class="p-2 hover:bg-blue-700 cursor-pointer">📊 Statistik</li>
-                <li class="p-2 hover:bg-blue-700 cursor-pointer">📝 Tugas</li>
-            </ul>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+<div class="flex">
+    <!-- Sidebar -->
+    <div class="bg-blue-800 text-white w-64 min-h-screen p-5">
+        <h2 class="text-2xl font-bold">Admin Dashboard</h2>
+        <ul class="mt-5 space-y-2">
+            <li class="p-2 hover:bg-blue-600 cursor-pointer">Dashboard</li>
+            <li class="p-2 hover:bg-blue-600 cursor-pointer">Manajemen Pengguna</li>
+        </ul>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 p-5">
+        <button id="toggleDarkMode" class="bg-gray-600 text-white px-4 py-2 rounded-md">🌙 Mode Dark</button>
+
+        <h1 class="text-3xl font-bold mt-5">Dashboard</h1>
+
+        <!-- Statistik -->
+        <div class="mt-5">
+            <h2 class="text-xl font-semibold">Statistik Pengguna</h2>
+            <canvas id="userChart"></canvas>
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <h1 class="text-3xl font-bold">Selamat Datang!</h1>
-            <canvas id="myChart" class="mt-4"></canvas>
+        <!-- Manajemen Pengguna -->
+        <div class="mt-5">
+            <h2 class="text-xl font-semibold">Manajemen Pengguna</h2>
 
-            <!-- Tabel Data -->
-            <div class="mt-6">
-                <h2 class="text-xl font-bold">Daftar Tugas</h2>
-                <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden mt-2">
-                    <thead>
-                        <tr class="bg-blue-600 text-white">
-                            <th class="p-3 text-left">ID</th>
-                            <th class="p-3 text-left">Judul</th>
-                            <th class="p-3 text-left">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="taskTable"></tbody>
-                </table>
+            <div class="flex space-x-2 mt-3">
+                <input type="text" id="searchUser" placeholder="Cari pengguna..." class="p-2 border rounded w-1/2">
+                <button id="addUser" class="bg-green-500 text-white px-4 py-2 rounded">Tambah</button>
+            </div>
+
+            <table class="w-full bg-white shadow-md rounded mt-3">
+                <thead>
+                    <tr class="bg-blue-600 text-white">
+                        <th class="p-3">ID</th>
+                        <th class="p-3">Nama</th>
+                        <th class="p-3">Email</th>
+                        <th class="p-3">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="userTable"></tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="flex justify-between mt-3">
+                <button id="prevPage" class="bg-gray-500 text-white px-3 py-2 rounded">⏪ Prev</button>
+                <span id="pageInfo"></span>
+                <button id="nextPage" class="bg-gray-500 text-white px-3 py-2 rounded">Next ⏩</button>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Fetch data from API
-        fetch('https://jsonplaceholder.typicode.com/todos')
-            .then(response => response.json())
-            .then(data => {
-                let rows = '';
-                data.slice(0, 5).forEach(task => {
-                    rows += `<tr class='border-b'>
-                        <td class='p-3'>${task.id}</td>
-                        <td class='p-3'>${task.title}</td>
-                        <td class='p-3'>${task.completed ? '✅ Selesai' : '⏳ Belum Selesai'}</td>
-                    </tr>`;
-                });
-                document.getElementById('taskTable').innerHTML = rows;
-            });
-
-        // Chart.js Statistik
-        const ctx = document.getElementById('myChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'],
-                datasets: [{
-                    label: 'Tugas Selesai',
-                    data: [12, 19, 3, 5, 2],
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                }]
-            }
-        });
-    </script>
+<script src="assets/script.js"></script>
 </body>
 </html>
