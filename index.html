@@ -6,6 +6,8 @@
     <title>Dashboard Admin</title>
     <link rel="stylesheet" href="assets/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body x-data="{ darkMode: false }" :class="{ 'dark': darkMode }" class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
@@ -36,6 +38,36 @@
 
             <h1 class="text-3xl font-bold mt-5">Dashboard</h1>
 
+            <!-- Filter Tugas -->
+            <div class="mt-5">
+                <select id="statusFilter" class="border p-2 rounded w-full">
+                    <option value="all">Semua Tugas</option>
+                    <option value="completed">Tugas Selesai</option>
+                    <option value="incomplete">Tugas Belum Selesai</option>
+                </select>
+            </div>
+
+            <!-- Pencarian Tugas -->
+            <div class="mt-5">
+                <input type="text" id="searchInput" placeholder="Cari Tugas..." class="border p-2 rounded w-full" />
+            </div>
+
+            <!-- Form Tambah Tugas -->
+            <div class="mt-5">
+                <h2 class="text-xl font-semibold">Tambah Tugas Baru</h2>
+                <form id="addTaskForm" class="flex flex-col">
+                    <input type="text" id="taskTitle" placeholder="Judul Tugas" class="border p-2 rounded mb-2" required />
+                    <select id="taskCategory" class="border p-2 rounded mb-2" required>
+                        <option value="">Pilih Kategori</option>
+                        <option value="Pekerjaan">Pekerjaan</option>
+                        <option value="Pribadi">Pribadi</option>
+                        <option value="Urgent">Urgent</option>
+                    </select>
+                    <input type="date" id="taskDueDate" class="border p-2 rounded mb-2" required />
+                    <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">Tambah Tugas</button>
+                </form>
+            </div>
+
             <!-- Tabel Data -->
             <div id="tableSection" class="mt-5">
                 <h2 class="text-xl font-semibold">Daftar Tugas</h2>
@@ -44,17 +76,39 @@
                         <tr class="bg-[#71BBB2] text-white">
                             <th class="p-3">ID</th>
                             <th class="p-3">Judul</th>
+                            <th class="p-3">Kategori</th>
+                            <th class="p-3">Status</th>
                             <th class="p-3">Aksi</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+                <div id="commentsSection" class="mt-5"></div> <!-- Area untuk komentar -->
             </div>
 
-            <!-- Grafik -->
+            <!-- Grafik Statistik Tugas -->
             <div id="chartSection" class="mt-5 hidden">
-                <h2 class="text-xl font-semibold">Grafik Statistik</h2>
+                <h2 class="text-xl font-semibold">Grafik Statistik Tugas</h2>
                 <canvas id="taskChart"></canvas>
+            </div>
+
+            <!-- Grafik Statistik Tugas -->
+            <div id="statsSection" class="mt-5">
+                <h2 class="text-xl font-semibold">Statistik Tugas</h2>
+                <div id="statsContainer" class="flex justify-between">
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded shadow-md">
+                        <h3 class="font-bold">Jumlah Tugas Selesai</h3>
+                        <p id="completedCount">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded shadow-md">
+                        <h3 class="font-bold">Jumlah Tugas Belum Selesai</h3>
+                        <p id="incompleteCount">0</p>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded shadow-md">
+                        <h3 class="font-bold">Persentase Penyelesaian</h3>
+                        <p id="completionPercentage">0%</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

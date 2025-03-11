@@ -1,159 +1,205 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const darkModeButton = document.getElementById("toggleDarkMode");
     const viewToggle = document.getElementById("viewToggle");
-    const tableSection = document.getElementById("tableSection");
-    const chartSection = document.getElementById("chartSection");
-    const userTable = document.getElementById("userTable");
-    const userChartCanvas = document.getElementById("userChart");
-    let isDarkMode = localStorage.getItem("darkMode") === "true";
+    const statusFilter = document.getElementById("statusFilter");
+    const searchInput = document.getElementById("searchInput");
+    const addTaskForm = document.getElementById("addTaskForm");
+    const taskTable = document.getElementById("taskTable");
+    const taskChartCanvas = document.getElementById("taskChart");
+    const completedCountElement = document.getElementById("completedCount");
+    const incompleteCountElement = document.getElementById("incompleteCount");
+    const completionPercentageElement = document.getElementById("completionPercentage");
+    let tasks = []; // Menyimpan data tugas
+    let comments = {}; // Menyimpan komentar untuk setiap tugas
 
-    setDarkMode(isDarkMode);
-
-    if (darkModeButton) {
-        darkModeButton.addEventListener("click", function () {
-            isDarkMode = !isDarkMode;
-            localStorage.setItem("darkMode", isDarkMode);
-            setDarkMode(isDarkMode);
-        });
-    }
-
-    function setDarkMode(enable) {
-        document.body.classList.toggle("dark", enable);
-        if (darkModeButton) {
-            darkModeButton.textContent = enable ? "☀ Mode Light" : "🌙 Mode Dark";
+    // Mengatur mode gelap otomatis berdasarkan waktu
+    function setAutoDarkMode() {
+        const hour = new Date().getHours();
+        if (hour >= 18 || hour < 6) {
+            document.body.classList.add("dark");
+        } else {
+            document.body.classList.remove("dark");
         }
     }
 
-    // Data Dummy Pengguna
-    let users = [
-        { id: 1, nama: "Budi Santoso", email: "budi@email.com" },
-        { id: 2, nama: "Siti Aminah", email: "siti@email.com" },
-        { id: 3, nama: "Joko Widodo", email: "joko@email.com" }
-    ];
-    
-    let currentPage = 1;
-    const itemsPerPage = 2;
-
-    function renderUsers() {
-        if (!userTable) return;
-
-        userTable.innerHTML = "";
-        let start = (currentPage - 1) * itemsPerPage;
-        let paginatedUsers = users.slice(start, start + itemsPerPage);
-
-        paginatedUsers.forEach(user => {
-            let row = `<tr>
-                <td class="p-3">${user.id}</td>
-                <td class="p-3">${user.nama}</td>
-                <td class="p-3">${user.email}</td>
-                <td class="p-3">
-                    <button onclick="deleteUser(${user.id})" class="bg-red-500 text-white px-2 py-1 rounded">Hapus</button>
-                </td>
-            </tr>`;
-            userTable.innerHTML += row;
-        });
-
-        document.getElementById("pageInfo").textContent = `Halaman ${currentPage}`;
-    }
-
-    window.deleteUser = function (id) {
-        users = users.filter(u => u.id !== id);
-        renderUsers();
-        renderChart();
-    };
-
-    renderUsers();
-
-    function renderChart() {
-        if (!userChartCanvas) return;
-
-        const ctx = userChartCanvas.getContext("2d");
-        if (window.userChart) {
-            window.userChart.destroy();
-        }
-
-        window.userChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: users.map(u => u.nama),
-                datasets: [{
-                    label: "Jumlah Pengguna",
-                    data: users.map(() => Math.floor(Math.random() * 10) + 1),
-                    backgroundColor: "#FFA725"
-                }]
-            }
-        });
-    }
-
-    renderChart();
-
-    if (viewToggle) {
-        viewToggle.addEventListener("change", function () {
-            tableSection.classList.toggle("hidden", this.value === "chart");
-            chartSection.classList.toggle("hidden", this.value !== "chart");
-        });
-    }
-
-    // Fetch API untuk Data Dummy
+    // Fetch API untuk Data Tugas
     async function fetchTasks() {
         try {
             const response = await fetch("https://jsonplaceholder.typicode.com/todos?_limit=10");
-            const data = await response.json();
-            populateTable(data);
-            renderTaskChart(data);
+            tasks = await response.json();
+            populateTable(tasks);
+            renderTaskChart(tasks);
+            updateStatistics(tasks);
+            checkDueDates(); // Periksa tenggat waktu setelah mengambil tugas
         } catch (error) {
             console.error("Error fetching tasks:", error);
         }
     }
 
-    function populateTable(tasks) {
+    function populateTable(tasksToDisplay) {
         const tableBody = document.querySelector("#taskTable tbody");
         if (!tableBody) return;
         tableBody.innerHTML = "";
 
-        tasks.forEach(task => {
+        tasksToDisplay.forEach(task => {
+            const status = task.completed ? "Selesai" : "Belum Selesai";
             const row = `<tr class="border-b">
                             <td class="p-3">${task.id}</td>
                             <td class="p-3">${task.title}</td>
+                            <td class="p-3">${task.category || 'N/A'}</td>
+                            <td class="p-3">${status}</td>
                             <td class="p-3">
-                                <button onclick="deleteTask(${task.id})" class="bg-red-500 text-white px-3 py-1 rounded">Hapus</button>
+                                <button onclick="editTask(${task.id})" class="bg-blue-500 text-white px-2 py-1 rounded">Edit</button>
+                                <button onclick="deleteTask(${task.id})" class="bg-red-500 text-white px-2 py-1 rounded">Hapus</button>
+                                <button onclick="toggleTaskStatus(${task.id})" class="bg-yellow-500 text-white px-2 py-1 rounded">${task.completed ? 'Tandai Belum Selesai' : 'Tandai Selesai'}</button>
                             </td>
                         </tr>`;
             tableBody.innerHTML += row;
+
+            // Tampilkan komentar untuk tugas ini
+            displayComments(task.id);
         });
     }
 
-    window.deleteTask = function (id) {
-        const tableBody = document.querySelector("#taskTable tbody");
-        if (!tableBody) return;
+    function displayComments(taskId) {
+        const commentsContainer = document.getElementById("commentsSection");
+        const taskComments = comments[taskId] || [];
+        let commentsHtml = `<h3 class="font-bold">Komentar untuk Tugas ${taskId}</h3>`;
+        commentsHtml += `<div class="mb-2"><input type="text" id="commentInput${taskId}" placeholder="Tambahkan komentar..." class="border p-2 rounded" />
+                         <button onclick="addComment(${taskId})" class="bg-blue-500 text-white px-2 py-1 rounded">Kirim</button></div>`;
+        taskComments.forEach(comment => {
+            commentsHtml += `<p>${comment}</p>`;
+        });
+        commentsContainer.innerHTML += `<div class="mt-5">${commentsHtml}</div>`;
+    }
 
-        let rows = Array.from(tableBody.children);
-        let rowToRemove = rows.find(row => row.children[0].textContent == id);
-        if (rowToRemove) {
-            rowToRemove.remove();
+    window.addComment = function (taskId) {
+        const commentInput = document.getElementById(`commentInput${taskId}`);
+        const comment = commentInput.value;
+        if (comment) {
+            if (!comments[taskId]) {
+                comments[taskId] = [];
+            }
+            comments[taskId].push(comment);
+            commentInput.value = ""; // Reset input
+            displayComments(taskId); // Tampilkan komentar terbaru
+        }
+    };
+
+    window.deleteTask = function (id) {
+        tasks = tasks.filter(task => task.id !== id);
+        populateTable(tasks);
+        renderTaskChart(tasks);
+        updateStatistics(tasks);
+        Swal.fire('Tugas berhasil dihapus!'); // Notifikasi dengan SweetAlert2
+    };
+
+    window.editTask = function (id) {
+        const taskToEdit = tasks.find(task => task.id === id);
+        if (taskToEdit) {
+            Swal.fire({
+                title: 'Edit Judul Tugas',
+                input: 'text',
+                inputValue: taskToEdit.title,
+                showCancelButton: true,
+                confirmButtonText: 'Simpan',
+                cancelButtonText: 'Batal',
+                preConfirm: (newTitle) => {
+                    if (!newTitle) {
+                        Swal.showValidationMessage('Judul tidak boleh kosong!');
+                    }
+                    return newTitle;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    taskToEdit.title = result.value;
+                    populateTable(tasks);
+                    renderTaskChart(tasks);
+                    updateStatistics(tasks);
+                    Swal.fire('Tugas berhasil diperbarui!'); // Notifikasi
+                }
+            });
+        }
+    };
+
+    window.toggleTaskStatus = function (id) {
+        const taskToToggle = tasks.find(task => task.id === id);        
+        if (taskToToggle) {
+            taskToToggle.completed = !taskToToggle.completed;
+            populateTable(tasks);
+            renderTaskChart(tasks);
+            updateStatistics(tasks);
+            if (taskToToggle.completed) {
+                Swal.fire('Tugas berhasil diselesaikan!'); // Notifikasi
+            } else {
+                Swal.fire('Tugas berhasil dibatalkan!'); // Notifikasi
+            }
         }
     };
 
     function renderTaskChart(tasks) {
-        const ctx = document.getElementById("taskChart");
-        if (!ctx) return;
-
-        if (window.taskChart) {
-            window.taskChart.destroy();
-        }
-
-        window.taskChart = new Chart(ctx.getContext("2d"), {
-            type: "bar",
+        const completedCount = tasks.filter(task => task.completed).length;
+        const incompleteCount = tasks.filter(task => !task.completed).length;        
+        const completionPercentage = (completedCount / tasks.length) * 100;
+        const taskChart = new Chart(taskChartCanvas, {
+            type: 'doughnut',
             data: {
-                labels: tasks.map(task => `Tugas ${task.id}`),
+                labels: ['Selesai', 'Belum Selesai'],    
                 datasets: [{
-                    label: "Progress",
-                    data: tasks.map(task => task.completed ? 100 : 50),
-                    backgroundColor: "#FFA725",
+                    data: [completedCount, incompleteCount],
+                    backgroundColor: ['green', 'red'],
+                    borderColor: ['green', 'red'],
+                    borderWidth: 1
                 }]
+            },        
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Persentase Tugas',
+                    }
+                }
             }
-        });
+        });        
+        completedCountElement.textContent = completedCount;
+        incompleteCountElement.textContent = incompleteCount;
+        completionPercentageElement.textContent = completionPercentage.toFixed(2) + '%';
     }
 
-    fetchTasks();
-});
+    function updateStatistics(tasks) {
+        const completedCount = tasks.filter(task => task.completed).length;
+        const incompleteCount = tasks.filter(task => !task.completed).length;
+        const completionPercentage = (completedCount / tasks.length) * 100;
+        completedCountElement.textContent = completedCount;
+        incompleteCountElement.textContent = incompleteCount;
+        completionPercentageElement.textContent = completionPercentage.toFixed(2) + '%';
+    }
+        }    
+)
+
+    function checkDueDates() {
+        const today = new Date().toISOString().split('T')[0];
+        tasks.forEach(task => {
+            if (task.dueDate && task.dueDate < today) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Peringatan!',
+                    text: `Tugas ${task.title} telah melewati tenggat waktu. Tenggat waktu: ${task.dueDate}`,
+                    showConfirmButton: true,
+                });
+            }
+        })};
+
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    window.addEventListener('load', () => {
+        fetchTasks();
+        checkDueDates();
+        setAutoDarkMode();
+    });
