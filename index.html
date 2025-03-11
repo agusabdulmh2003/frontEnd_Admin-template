@@ -3,74 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
+    <title>Dashboard Admin</title>
+    <link rel="stylesheet" href="assets/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/style.css">
 </head>
-<body class="bg-27445D text-white">
+<body x-data="{ darkMode: false }" :class="{ 'dark': darkMode }" class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">
 
-<div class="flex">
-    <!-- Sidebar -->
-    <div class="bg-FFA725 text-white w-64 min-h-screen p-5">
-        <h2 class="text-2xl font-bold">Admin Dashboard</h2>
-        <ul class="mt-5 space-y-2">
-            <li class="p-2 hover:bg-71BBB2 cursor-pointer">Dashboard</li>
-            <li class="p-2 hover:bg-71BBB2 cursor-pointer">Manajemen Pengguna</li>
-        </ul>
-    </div>
-
-    <!-- Content -->
-    <div class="flex-1 p-5">
-        <div class="flex justify-between">
-            <button id="toggleDarkMode" class="bg-71BBB2 text-white px-4 py-2 rounded-md">🌙 Mode Dark</button>
-            <select id="viewToggle" class="bg-[#71BBB2] text-white px-4 py-2 rounded-md">
-                <option value="table">Tampilkan Tabel</option>
-                <option value="chart">Tampilkan Grafik</option>
-            </select>
-            <button id="logout" class="bg-71BBB2 text-white px-4 py-2 rounded-md">Logout</button>            
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="bg-[#27445D] text-white w-64 min-h-screen p-5">
+            <h2 class="text-2xl font-bold">Admin Dashboard</h2>
+            <ul class="mt-5">
+                <li class="p-2 hover:bg-[#71BBB2] cursor-pointer">Dashboard</li>
+                <li class="p-2 hover:bg-[#71BBB2] cursor-pointer">Tugas</li>
+                <li class="p-2 hover:bg-[#71BBB2] cursor-pointer">Statistik</li>
+            </ul>
         </div>
 
-        <h1 class="text-3xl font-bold mt-5">Dashboard</h1>
+        <!-- Content -->
+        <div class="flex-1 p-5">
+            <div class="flex justify-between">
+                <button @click="darkMode = !darkMode" class="bg-[#FFA725] text-white px-4 py-2 rounded-md">
+                    <span x-text="darkMode ? '☀ Mode Light' : '🌙 Mode Dark'"></span>
+                </button>
 
-        <!-- Grafik Statistik -->
-        <div class="mt-5 hidden" id="chartContainer">
-            <h2 class="text-xl font-semibold">Statistik Pengguna</h2>
-            <canvas id="userChart"></canvas>
-        </div>
-
-        <!-- Manajemen Pengguna -->
-        <div class="mt-5" id="tableContainer">
-            <h2 class="text-xl font-semibold">Manajemen Pengguna</h2>
-
-            <div class="flex space-x-2 mt-3">
-                <input type="text" id="searchUser" placeholder="Cari pengguna..." class="p-2 border rounded w-1/2">
-                <button id="addUser" class="bg-71BBB2 text-white px-4 py-2 rounded">Tambah</button>
+                <select id="viewToggle" class="bg-[#27445D] text-white px-4 py-2 rounded-md">
+                    <option value="table">Tampilkan Tabel</option>
+                    <option value="chart">Tampilkan Grafik</option>
+                </select>
             </div>
 
-            <table class="w-full bg-white shadow-md rounded mt-3 text-black">
-                <thead>
-                    <tr class="bg-FFA725 text-white">
-                        <th class="p-3">ID</th>
-                        <th class="p-3">Nama</th>
-                        <th class="p-3">Email</th>
-                        <th class="p-3">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="userTable"></tbody>
-            </table>
+            <h1 class="text-3xl font-bold mt-5">Dashboard</h1>
 
-            <!-- Pagination -->
-            <div class="flex justify-between mt-3">
-                <button id="prevPage" class="bg-gray-500 text-white px-3 py-2 rounded">⏪ Prev</button>
-                <span id="pageInfo"></span>
-                <button id="nextPage" class="bg-gray-500 text-white px-3 py-2 rounded">Next ⏩</button>
+            <!-- Tabel Data -->
+            <div id="tableSection" class="mt-5">
+                <h2 class="text-xl font-semibold">Daftar Tugas</h2>
+                <table id="taskTable" class="w-full bg-white dark:bg-gray-800 shadow-md rounded mt-3">
+                    <thead>
+                        <tr class="bg-[#71BBB2] text-white">
+                            <th class="p-3">ID</th>
+                            <th class="p-3">Judul</th>
+                            <th class="p-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Grafik -->
+            <div id="chartSection" class="mt-5 hidden">
+                <h2 class="text-xl font-semibold">Grafik Statistik</h2>
+                <canvas id="taskChart"></canvas>
             </div>
         </div>
     </div>
-</div>
 
-<script src="assets/script.js"></script>
+    <script src="assets/script.js"></script>
 </body>
 </html>
